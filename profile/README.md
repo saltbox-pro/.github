@@ -38,4 +38,4 @@ Salt.Box is developed and maintained by [DT-Software](https://dt-software.ru/)
 
 ## License
 
-Salt.Box Compose is distributed under the **Apache License 2.0**.
+Salt.Box Compose is distributed under the **Apache License 2.0**
