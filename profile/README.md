@@ -5,7 +5,7 @@
 Welcome to the official Salt.Box GitHub organization
 
 <a href="https://saltbox.pro/" target="_blank" rel="noopener noreferrer">
-  <img src="https://github.com/saltbox-pro/.github/raw/main/logo_boarded.svg" width="100%" alt="Salt.Box logo"/>
+  <img src="https://github.com/saltbox-pro/.github/raw/main/logo.svg" width="100%" alt="Salt.Box logo"/>
 </a>
 
 [![Website](https://img.shields.io/badge/website-saltbox.pro-2496ED)](https://saltbox.pro/)
