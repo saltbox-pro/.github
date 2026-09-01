@@ -8,9 +8,15 @@ Welcome to the official Salt.Box GitHub organization
   <img src="https://dev.saltbox.pro/saltbox/saltbox-compose/-/raw/dev/docs/logo.svg?ref_type=heads" width="100%" alt="Salt.Box logo"/>
 </a>
 
+[![Website](https://img.shields.io/badge/website-saltbox.pro-2496ED)](https://saltbox.pro/)
+[![Docs](https://img.shields.io/badge/docs-saltbox.pro%2Fdocs-2496ED)](https://saltbox.pro/docs/next/intro)
+[![GitLab](https://img.shields.io/badge/GitLab-dev.saltbox.pro-FC6D26?logo=gitlab&logoColor=white)](https://dev.saltbox.pro/)
+[![Telegram](https://img.shields.io/badge/Telegram-salt__box-26A5E4?logo=telegram&logoColor=white)](https://t.me/salt_box/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](https://saltbox.pro/)
+
 **Salt.Box** is a web UI for [SaltStack](https://saltproject.io/) configuration management. It manages software configurations of workstations across hybrid IT infrastructure: **hardware/software inventory, group policy administration, application deployment, and migration to GNU/Linux**. Configuration tasks run asynchronously against individual or grouped machines, can be triggered by events, and are controlled through a single web UI with role-based multi-user access, reporting, and an integration bus for extending the platform with modules
 
-Salt.Box is developed and maintained by [DT-Software](https://dt-software.ru/)
+> Salt.Box is developed and maintained by [DT-Software](https://dt-software.ru/)
 
 </div>
 
