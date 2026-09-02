@@ -12,6 +12,3 @@ contact_links:
   - name: Contact us by email
     url: mailto:info@saltbox.pro
     about: General inquiries
-  - name: Report a security vulnerability
-    url: https://github.com/saltbox-pro/.github/security/policy
-    about: Do not open a public issue for security reports – see SECURITY.md
