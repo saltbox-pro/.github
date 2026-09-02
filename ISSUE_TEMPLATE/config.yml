@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a bug or request a feature (GitLab)
+    url: https://dev.saltbox.pro/explore/projects?sort=latest_activity_desc
+    about: >-
+      This GitHub organization is a read-only mirror. Bugs and feature
+      requests are tracked on the project's page on our primary GitLab
+      instance
+  - name: Ask a question (Telegram)
+    url: https://t.me/salt_box/
+    about: Chat with the Salt.Box team and community.
+  - name: Contact us by email
+    url: mailto:info@saltbox.pro
+    about: General inquiries
+  - name: Report a security vulnerability
+    url: https://github.com/saltbox-pro/.github/security/policy
+    about: Do not open a public issue for security reports – see SECURITY.md
