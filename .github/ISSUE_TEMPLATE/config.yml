@@ -8,7 +8,7 @@ contact_links:
       instance
   - name: Ask a question (Telegram)
     url: https://t.me/salt_box/
-    about: Chat with the Salt.Box team and community.
+    about: Chat with the Salt.Box team and community
   - name: Contact us by email
     url: mailto:info@saltbox.pro
     about: General inquiries
