@@ -28,7 +28,7 @@ jobs:
         run: |
           PROJECT_PATH="${{ inputs.gitlab_project_path  }}"
           if [ -z "${PROJECT_PATH}" ]; then
-            PROJECT_PATH="${{ github.event.repository.name }}"
+            PROJECT_PATH="saltbox/${{ github.event.repository.name }}"
           fi
           echo "project_path=${PROJECT_PATH}" >> "$GITHUB_OUTPUT"
           echo "project_id_enc=${PROJECT_PATH//\//%2F}" >> "$GITHUB_OUTPUT"
