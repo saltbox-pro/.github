@@ -17,6 +17,12 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug token presence
+        env:
+          GITLAB_PR_SYNC_TOKEN: ${{ secrets.GITLAB_PR_SYNC_TOKEN }}
+        run: |
+          echo "Token length: ${#GITLAB_PR_SYNC_TOKEN}"
+
       - name: Resolve GitLab project path
         id: vars
         run: |
@@ -29,6 +35,7 @@ jobs:
 
       - name: Push PR branch to GitLab
         env:
+          GIT_TERMINAL_PROMPT: "0"
           GITLAB_TOKEN: ${{ secrets.GITLAB_PR_SYNC_TOKEN }}
           PROJECT_PATH: ${{ steps.vars.outputs.project_path }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -36,7 +43,7 @@ jobs:
           git init --bare sync.git
           cd sync.git
           git remote add gh "https://github.com/${{ github.repository }}.git"
-          git remote add gl "https://${GITLAB_TOKEN}@dev.saltbox.pro/${PROJECT_PATH}.git"
+          git remote add gl "https://oauth2:${GITLAB_TOKEN}@dev.saltbox.pro/${PROJECT_PATH}.git"
           git fetch gh "pull/${PR_NUMBER}/head:pr-${PR_NUMBER}"
           git push gl "pr-${PR_NUMBER}:refs/heads/github-pr-${PR_NUMBER}"
 
