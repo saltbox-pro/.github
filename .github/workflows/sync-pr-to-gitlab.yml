@@ -1,0 +1,65 @@
+name: Sync PR to GitLab
+
+
+on:
+  workflow_call:
+    inputs:
+      gitlab_project_path:
+        description: "GitLab project path as namespace/repo. Default: saltbox/<repo-name>"
+        type: string
+        required: false
+    secrets:
+      GITLAB_PR_SYNC_TOKEN:
+        required: true
+
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve GitLab project path
+        id: vars
+        run: |
+          PROJECT_PATH="${{ inputs.gitlab_project_path  }}"
+          if [ -z "${PROJECT_PATH}" ]; then
+            PROJECT_PATH="${{ github.event.repository.name }}"
+          fi
+          echo "project_path=${PROJECT_PATH}" >> "$GITHUB_OUTPUT"
+          echo "project_id_enc=${PROJECT_PATH//\//%2F}" >> "$GITHUB_OUTPUT"
+
+      - name: Push PR branch to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_PR_SYNC_TOKEN }}
+          PROJECT_PATH: ${{ steps.vars.outputs.project_path }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git init --bare sync.git
+          cd sync.git
+          git remote add gh "https://github.com/${{ github.repository }}.git"
+          git remote add gl "https://${GITLAB_TOKEN}@dev.saltbox.pro/${PROJECT_PATH}.git"
+          git fetch gh "pull/${PR_NUMBER}/head:pr-${PR_NUMBER}"
+          git push gl "pr-${PR_NUMBER}:refs/heads/github-pr-${PR_NUMBER}"
+
+      - name: Ensure MR exists in GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_PR_SYNC_TOKEN }}
+          PROJECT_ID_ENC: ${{ steps.vars.outputs.project_id_enc }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: |
+          API="https://dev.saltbox.pro/api/v4/projects/${PROJECT_ID_ENC}/merge_requests"
+          SOURCE_BRANCH="github-pr-${PR_NUMBER}"
+
+          EXISTING=$(curl -sS --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+                      "${API}?source_branch=${SOURCE_BRANCH}&state=opened" | jq 'length')
+          if [ "$EXISTING" = "0" ]; then
+            curl -sS -f -X POST "${API}" \
+              --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+              --data-urlencode "source_branch=${SOURCE_BRANCH}" \
+              --data-urlencode "target_branch=${TARGET_BRANCH}" \
+              --data-urlencode "title=${PR_TITLE}" \
+              --data-urlencode "description=Synced from GitHub PR #${PR_NUMBER} by @${PR_AUTHOR} https://github.com/${{ github.repository }}/pull/${PR_NUMBER}"
+          fi
+
