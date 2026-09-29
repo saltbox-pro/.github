@@ -4,10 +4,16 @@ name: Sync PR to GitLab
 on:
   workflow_call:
     inputs:
+      pr_number:
+        description: "Number of GitHub PR to sync"
+        type: string
+        required: true
+
       gitlab_project_path:
         description: "GitLab project path as namespace/repo. Default: saltbox/<repo-name>"
         type: string
         required: false
+
     secrets:
       GITLAB_PR_SYNC_TOKEN:
         required: true
@@ -17,12 +23,6 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug token presence
-        env:
-          GITLAB_PR_SYNC_TOKEN: ${{ secrets.GITLAB_PR_SYNC_TOKEN }}
-        run: |
-          echo "Token length: ${#GITLAB_PR_SYNC_TOKEN}"
-
       - name: Resolve GitLab project path
         id: vars
         run: |
@@ -33,12 +33,28 @@ jobs:
           echo "project_path=${PROJECT_PATH}" >> "$GITHUB_OUTPUT"
           echo "project_id_enc=${PROJECT_PATH//\//%2F}" >> "$GITHUB_OUTPUT"
 
+
+      - name: Resolve PR metadata
+        id: pr_meta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_JSON=$(curl -sS -f \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ inputs.pr_number }}"
+          )
+          echo "title=$(echo "$PR_JSON" | jq -r '.title')" >> "$GITHUB_OUTPUT"
+          echo "author=$(echo "$PR_JSON" | jq -r '.user.login')" >> "$GITHUB_OUTPUT"
+          echo "base_ref=$(echo "$PR_JSON" | jq -r '.base.ref')" >> "$GITHUB_OUTPUT"
+
+
       - name: Push PR branch to GitLab
         env:
           GIT_TERMINAL_PROMPT: "0"
           GITLAB_TOKEN: ${{ secrets.GITLAB_PR_SYNC_TOKEN }}
           PROJECT_PATH: ${{ steps.vars.outputs.project_path }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ inputs.pr_number }}
         run: |
           git init --bare sync.git
           cd sync.git
@@ -47,14 +63,15 @@ jobs:
           git fetch gh "pull/${PR_NUMBER}/head:pr-${PR_NUMBER}"
           git push gl "pr-${PR_NUMBER}:refs/heads/github-pr-${PR_NUMBER}"
 
+
       - name: Ensure MR exists in GitLab
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_PR_SYNC_TOKEN }}
           PROJECT_ID_ENC: ${{ steps.vars.outputs.project_id_enc }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          PR_TITLE: ${{ steps.pr_meta.outputs.title }}
+          PR_AUTHOR: ${{ steps.pr_meta.outputs.author }}
+          TARGET_BRANCH: ${{ steps.pr_meta.outputs.base_ref }}
         run: |
           API="https://dev.saltbox.pro/api/v4/projects/${PROJECT_ID_ENC}/merge_requests"
           SOURCE_BRANCH="github-pr-${PR_NUMBER}"
